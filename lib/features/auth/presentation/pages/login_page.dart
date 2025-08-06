@@ -1,11 +1,20 @@
+import 'dart:developer';
+
 import 'package:bookedin_app/features/auth/presentation/widgets/CustomTextFormField.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   LoginPage({super.key});
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
+
   final passwordController = TextEditingController();
+  bool showErrorMsg = false;
 
   @override
   Widget build(BuildContext context) {
@@ -35,17 +44,37 @@ class LoginPage extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
+          SizedBox(height: 30),
 
-          SizedBox(height: 40),
+          if (showErrorMsg) _buildErrorMsg(),
+
+          SizedBox(height: 20),
           CustomTextFormField(controller: emailController, fieldType: "Email"),
           CustomTextFormField(
-            controller: emailController,
+            controller: passwordController,
             fieldType: "Password",
           ),
 
           SizedBox(height: 25),
           _buildElevatedButton(),
         ],
+      ),
+    );
+  }
+
+  Container _buildErrorMsg() {
+    return Container(
+      width: 345,
+      height: 60,
+      decoration: BoxDecoration(
+        color: Color(0xFFdb4653),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Center(
+        child: Text(
+          "❌ Wrong username or password",
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
       ),
     );
   }
@@ -74,7 +103,14 @@ class LoginPage extends StatelessWidget {
 
   ElevatedButton _buildElevatedButton() {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: () {
+        if (emailController.text.trim().isEmpty ||
+            passwordController.text.trim().isEmpty) {
+          setState(() {
+            showErrorMsg = true;
+          });
+        }
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.white,
         minimumSize: const Size(350, 60),
