@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:bookedin_app/features/auth/presentation/widgets/CustomTextFormField.dart';
@@ -12,24 +13,68 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
-
   final passwordController = TextEditingController();
+
   bool showErrorMsg = false;
+  int errorCount = 0;
+  bool isBlocked = false;
+  DateTime? blockUntil;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBlockStatus();
+  }
+
+  void _checkBlockStatus() {
+    if (blockUntil != null && DateTime.now().isBefore(blockUntil!)) {
+      setState(() {
+        isBlocked = true;
+      });
+      _startBlockTimer();
+    }
+  }
+
+  void _startBlockTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (blockUntil == null || DateTime.now().isAfter(blockUntil!)) {
+        timer.cancel();
+        setState(() {
+          isBlocked = false;
+          errorCount = 0;
+          showErrorMsg = false;
+          blockUntil = null;
+        });
+      } else {
+        setState(() {});
+      }
+    });
+  }
+
+  String _remainingTime() {
+    if (blockUntil == null) return '';
+    final remaining = blockUntil!.difference(DateTime.now());
+    final minutes = remaining.inMinutes;
+    final seconds = remaining.inSeconds % 60;
+    return "$minutes minute(s) ${seconds.toString().padLeft(2, '0')} second(s)";
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF2560e8),
+      backgroundColor: const Color(0xFF2560e8),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildLogo(),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Text(
-              "Welcome Back",
-              style: TextStyle(
+              isBlocked ? "Account Blocked" : "Welcome Back",
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 40,
                 fontWeight: FontWeight.w700,
@@ -37,43 +82,53 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           Text(
-            "Sign in to book meeting rooms",
-            style: TextStyle(
+            isBlocked
+                ? "Too many failed attempts"
+                : "Sign in to book meeting rooms",
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 20,
               fontWeight: FontWeight.w700,
             ),
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
 
-          if (showErrorMsg) _buildErrorMsg(),
+          if (showErrorMsg && !isBlocked)
+            _buildErrorMsg("❌ Wrong username or password"),
 
-          SizedBox(height: 20),
-          CustomTextFormField(controller: emailController, fieldType: "Email"),
+          if (isBlocked) _buildBlockTimeMsg(),
+
+          const SizedBox(height: 20),
+          CustomTextFormField(
+            controller: emailController,
+            fieldType: "Email",
+            enabled: !isBlocked,
+          ),
           CustomTextFormField(
             controller: passwordController,
             fieldType: "Password",
+            enabled: !isBlocked,
           ),
 
-          SizedBox(height: 25),
+          const SizedBox(height: 25),
           _buildElevatedButton(),
         ],
       ),
     );
   }
 
-  Container _buildErrorMsg() {
+  Container _buildErrorMsg(String msg) {
     return Container(
       width: 345,
       height: 60,
       decoration: BoxDecoration(
-        color: Color(0xFFdb4653),
+        color: const Color(0xFFdb4653),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Center(
         child: Text(
-          "❌ Wrong username or password",
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          msg,
+          style: const TextStyle(color: Colors.white, fontSize: 20),
         ),
       ),
     );
@@ -86,10 +141,10 @@ class _LoginPageState extends State<LoginPage> {
         width: 100,
         height: 100,
         decoration: BoxDecoration(
-          color: Color(0xFF4f7dea),
+          color: const Color(0xFF4f7dea),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Text(
+        child: const Text(
           "MR",
           style: TextStyle(
             color: Colors.white,
@@ -103,14 +158,32 @@ class _LoginPageState extends State<LoginPage> {
 
   ElevatedButton _buildElevatedButton() {
     return ElevatedButton(
-      onPressed: () {
-        if (emailController.text.trim().isEmpty ||
-            passwordController.text.trim().isEmpty) {
-          setState(() {
-            showErrorMsg = true;
-          });
-        }
-      },
+      onPressed: isBlocked
+          ? null
+          : () {
+              if (emailController.text.trim().isEmpty ||
+                  passwordController.text.trim().isEmpty) {
+                setState(() {
+                  showErrorMsg = true;
+                  errorCount++;
+
+                  if (errorCount >= 5) {
+                    isBlocked = true;
+                    blockUntil = DateTime.now().add(const Duration(minutes: 20)); 
+                    _checkBlockStatus();
+                  }
+
+                  log('Login failed $errorCount times');
+                });
+              } else {
+                setState(() {
+                  showErrorMsg = false;
+                  errorCount = 0;
+                });
+
+                // Real login logic here
+              }
+            },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.white,
         minimumSize: const Size(350, 60),
@@ -126,5 +199,45 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildBlockTimeMsg() {
+    return Container(
+      width: 320,
+      height: 100,
+      decoration: BoxDecoration(
+        color: const Color(0xFFdb4553),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            "Account temporarily blocked",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            "Try again in ${_remainingTime()}",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }
