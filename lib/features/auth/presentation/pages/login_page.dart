@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:bookedin_app/features/admin/presentation/pages/admin_portal.dart';
 import 'package:bookedin_app/features/auth/presentation/widgets/CustomTextFormField.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({super.key});
+
+  static const route = '/login_page';
+
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -181,7 +185,8 @@ class _LoginPageState extends State<LoginPage> {
                   errorCount = 0;
                 });
 
-                // Real login logic here
+                                  Navigator.pushNamed(context, AdminPortal.route);
+
               }
             },
       style: ElevatedButton.styleFrom(
