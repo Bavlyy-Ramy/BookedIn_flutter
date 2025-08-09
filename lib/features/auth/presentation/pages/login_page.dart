@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:bookedin_app/features/admin/presentation/pages/admin_portal.dart';
 import 'package:bookedin_app/features/auth/presentation/widgets/CustomTextFormField.dart';
+import 'package:bookedin_app/features/staff%20user/presentation/pages/staff_portal.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -185,7 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                   errorCount = 0;
                 });
 
-                                  Navigator.pushNamed(context, AdminPortal.route);
+                                  Navigator.pushNamed(context, StaffPortal.route);
 
               }
             },
