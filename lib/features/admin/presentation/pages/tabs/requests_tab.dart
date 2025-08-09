@@ -1,3 +1,4 @@
+import 'package:bookedin_app/features/admin/presentation/widgets/request_card.dart';
 import 'package:flutter/material.dart';
 
 class RequestsTab extends StatelessWidget {
@@ -5,11 +6,19 @@ class RequestsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Requests Tab Content',
-        style: TextStyle(fontSize: 20),
-      ),
+    return ListView.builder(
+      itemCount: 2,
+      itemBuilder: (context, index) {
+        return RequestCard(
+          email: 'john.doe@company.com',
+          requestedTime: '2 hours ago',
+          dateTime: 'Aug 10, 09:00–12:00',
+          duration: '3 hours',
+          room: 'Room 1',
+          onApprove: () {},
+          onReject: () {},
+        );
+      },
     );
   }
 }
