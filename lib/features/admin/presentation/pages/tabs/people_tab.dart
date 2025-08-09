@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 
 class PeopleTab extends StatefulWidget {
-  final VoidCallback onSuccessMessage;
+//  final VoidCallback onSuccessMessage;
 
-  const PeopleTab({Key? key, required this.onSuccessMessage}) : super(key: key);
+  const PeopleTab({Key? key,}) : super(key: key);
 
   @override
   _PeopleTabState createState() => _PeopleTabState();
@@ -136,7 +136,7 @@ class _PeopleTabState extends State<PeopleTab> {
     _sendPasswordSetupEmail(email);
 
     // Show success message
-    widget.onSuccessMessage();
+//    widget.onSuccessMessage();
   }
 
   void _sendPasswordSetupEmail(String email) {

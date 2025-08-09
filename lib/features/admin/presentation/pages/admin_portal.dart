@@ -1,6 +1,4 @@
-// lib/admin_portal.dart
-import 'package:bookedin_app/features/admin/presentation/pages/tabs/people_tab.dart';
-import 'package:bookedin_app/features/admin/presentation/pages/tabs/rooms_tab.dart';
+import 'package:bookedin_app/features/auth/presentation/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Add in pubspec
 import 'tabs/people_tab.dart';
@@ -11,7 +9,6 @@ class AdminPortal extends StatelessWidget {
   const AdminPortal({super.key});
   static const route = '/admin_portal';
 
-class AdminPortal extends StatefulWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -91,7 +88,7 @@ class AdminPortal extends StatefulWidget {
                 ],
               ),
             ),
-            const Expanded(
+            Expanded(
               child: TabBarView(
                 children: [PeopleTab(), RoomsTab(), RequestsTab()],
               ),
