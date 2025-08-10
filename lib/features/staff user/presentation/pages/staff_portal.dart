@@ -125,7 +125,7 @@ class _StaffPortalState extends State<StaffPortal> {
 
         return TableCalendar(
           focusedDay: today,
-          firstDay: DateTime.utc(2010, 10, 16),
+          firstDay: today,
           lastDay: DateTime.utc(2030, 10, 16),
           onDaySelected: _onDaySelected,
           selectedDayPredicate: (day) => isSameDay(day, today),
