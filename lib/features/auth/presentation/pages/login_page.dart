@@ -11,7 +11,6 @@ class LoginPage extends StatefulWidget {
 
   static const route = '/login_page';
 
-
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
@@ -174,7 +173,9 @@ class _LoginPageState extends State<LoginPage> {
 
                   if (errorCount >= 5) {
                     isBlocked = true;
-                    blockUntil = DateTime.now().add(const Duration(minutes: 20)); 
+                    blockUntil = DateTime.now().add(
+                      const Duration(minutes: 20),
+                    );
                     _checkBlockStatus();
                   }
 
@@ -185,9 +186,12 @@ class _LoginPageState extends State<LoginPage> {
                   showErrorMsg = false;
                   errorCount = 0;
                 });
-
-                                  Navigator.pushNamed(context, AdminPortal.route);
-
+                if (emailController.text.trim() == "admin" &&
+                    passwordController.text.trim() == "admin") {
+                  Navigator.pushNamed(context, AdminPortal.route);
+                } else {
+                  Navigator.pushNamed(context, StaffPortal.route);
+                }
               }
             },
       style: ElevatedButton.styleFrom(

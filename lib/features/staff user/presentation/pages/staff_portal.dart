@@ -1,8 +1,11 @@
+import 'package:bookedin_app/features/auth/presentation/pages/login_page.dart';
+import 'package:bookedin_app/features/staff%20user/presentation/pages/book_room.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class StaffPortal extends StatefulWidget {
-  StaffPortal({super.key});
+  const StaffPortal({super.key});
 
   static const route = '/staff_portal';
 
@@ -14,6 +17,35 @@ class _StaffPortalState extends State<StaffPortal> {
   DateTime today = DateTime.now();
 
   void _onDaySelected(DateTime day, DateTime focusedDay) {
+    // showDialog(
+    //   context: context,
+    //   builder: (BuildContext context) {
+    //     return AlertDialog(
+    //       title: Text('Booking'),
+    //       content: Text(
+    //         'Are you sure you want to book on ${DateFormat('d/M/yyyy').format(focusedDay)}?',
+    //       ),
+    //       actions: [
+    //         TextButton(
+    //           onPressed: () {
+    //             Navigator.of(context).pop();
+    //           },
+    //           child: Text('No'),
+    //         ),
+    //         TextButton(
+    //           onPressed: () {
+    //             setState(() {
+
+    //             });
+    //           },
+    //           child: Text('Yes'),
+    //         ),
+    //       ],
+    //     );
+    //   },
+    // );
+    Navigator.pushNamed(context, BookRoom.route);
+
     setState(() {
       today = day;
     });
@@ -22,86 +54,197 @@ class _StaffPortalState extends State<StaffPortal> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text(
-          "Staff Portal",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
-          ),
-        ),
-        backgroundColor: const Color(0xFF2258e0),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF4b73e3),
-                foregroundColor: const Color(0xFF2258e0),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {},
-              child: const Text(
-                "Logout",
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: Center(
-        child: Container(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-            child: TableCalendar(
-              headerStyle: HeaderStyle(
-                formatButtonVisible: false,
-                titleCentered: true,
-                titleTextStyle: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-                leftChevronIcon: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2258e0),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.all(6),
-                  child: const Icon(Icons.chevron_left, color: Colors.white),
-                ),
-                rightChevronIcon: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2258e0),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.all(6),
-                  child: const Icon(Icons.chevron_right, color: Colors.white),
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2258e0),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+      appBar: _buildAppBar(),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 20),
 
-              focusedDay: today,
-              firstDay: DateTime.utc(2010, 10, 16),
-              lastDay: DateTime.utc(2030, 10, 16),
-              onDaySelected: _onDaySelected,
-              availableGestures: AvailableGestures.all,
-              selectedDayPredicate: (day) => isSameDay(day, today),
+            _buildTableCalendar(),
+            SizedBox(height: 15),
+            _buildInfoBox(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Row _buildInfoBox() {
+    return Row(
+      children: [
+        Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: Color(0xFF3b82f6),
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 2.0),
+          child: Text("Selected"),
+        ),
+        SizedBox(width: 16),
+
+        Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: Color(0xFFedf0f2),
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 2.0),
+          child: Text("Fully Booked/Pending"),
+        ),
+        SizedBox(width: 16),
+
+        Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 2.0),
+          child: Text("Available"),
+        ),
+      ],
+    );
+  }
+
+  LayoutBuilder _buildTableCalendar() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cellWidth = (constraints.maxWidth - 15) / 7; // 7 days
+
+        return TableCalendar(
+          focusedDay: today,
+          firstDay: DateTime.utc(2010, 10, 16),
+          lastDay: DateTime.utc(2030, 10, 16),
+          onDaySelected: _onDaySelected,
+          selectedDayPredicate: (day) => isSameDay(day, today),
+          availableGestures: AvailableGestures.all,
+          calendarFormat: CalendarFormat.month,
+          rowHeight: cellWidth,
+          headerStyle: HeaderStyle(
+            formatButtonVisible: false,
+            titleCentered: true,
+            headerMargin: const EdgeInsets.only(bottom: 15),
+            titleTextStyle: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            leftChevronIcon: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.all(4),
+              child: const Icon(
+                Icons.chevron_left,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            rightChevronIcon: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.all(4),
+              child: const Icon(
+                Icons.chevron_right,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2258e0),
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          daysOfWeekStyle: const DaysOfWeekStyle(
+            weekdayStyle: TextStyle(
+              color: Colors.black54,
+              fontWeight: FontWeight.w500,
+            ),
+            weekendStyle: TextStyle(
+              color: Colors.black54,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          calendarStyle: CalendarStyle(
+            cellMargin: const EdgeInsets.all(2),
+            cellAlignment: Alignment.center,
+            defaultDecoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            weekendDecoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            outsideDecoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            selectedDecoration: BoxDecoration(
+              color: const Color(0xFF2258e0),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            todayDecoration: BoxDecoration(
+              border: Border.all(color: const Color(0xFF2258e0), width: 2),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            selectedTextStyle: const TextStyle(color: Colors.white),
+            outsideTextStyle: const TextStyle(color: Colors.grey),
+            todayTextStyle: const TextStyle(color: Colors.black),
+          ),
+        );
+      },
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      automaticallyImplyLeading: false,
+      title: const Text(
+        "Staff Portal",
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),
+      ),
+      backgroundColor: const Color(0xFF2258e0),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4b73e3),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () {
+              Navigator.pushNamed(context, LoginPage.route);
+            },
+            child: const Text(
+              "Logout",
+              style: TextStyle(color: Colors.white, fontSize: 16),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
