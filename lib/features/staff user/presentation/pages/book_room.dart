@@ -72,7 +72,6 @@ class _BookRoomState extends State<BookRoom> {
     );
   }
 
-  // Book only the clicked slot, then check contiguous blocks to convert to pending
   void _handleBookingLogic(String time, String room) {
     if (_roomBookings[time]![room] != UserBookingStatus.available) return;
 
@@ -80,14 +79,10 @@ class _BookRoomState extends State<BookRoom> {
       _roomBookings[time]![room] = UserBookingStatus.bookedByUser;
     });
 
-    // optional: notify admin about a single slot (you can remove if not needed)
     _sendRequestToAdmin(room, 'single_slot');
-
-    // After booking, convert any contiguous bookedByUser blocks (length >= 4) to pending
     _convertBookedSequencesToPending(room);
   }
 
-  // Find contiguous sequences of bookedByUser and convert to pending if length >= 4
   void _convertBookedSequencesToPending(String room) {
     final times = _roomBookings.keys.toList();
     List<int> indicesToConvert = [];
@@ -113,20 +108,17 @@ class _BookRoomState extends State<BookRoom> {
       setState(() {
         for (final idx in indicesToConvert) {
           final t = times[idx];
-          // Only convert bookedByUser -> pending (don't touch booked/pending)
           if (_roomBookings[t]![room] == UserBookingStatus.bookedByUser) {
             _roomBookings[t]![room] = UserBookingStatus.pending;
           }
         }
       });
-      // notify admin about multi-hour pending request
       _sendRequestToAdmin(room, 'multi_hour_pending');
       _showPendingMessageTemporary();
     }
   }
 
   void _confirmCancel(String time, String room) {
-    // only bookedByUser slots show cancel button
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -146,14 +138,11 @@ class _BookRoomState extends State<BookRoom> {
     );
   }
 
-  // Individual cancellation allowed only for bookedByUser
   void _cancelTimeSlot(String time, String room) {
     if (_roomBookings[time]![room] == UserBookingStatus.bookedByUser) {
       setState(() {
         _roomBookings[time]![room] = UserBookingStatus.available;
       });
-      // After cancelling a bookedByUser slot, no automatic conversion from pending happens
-      // (pending remains until admin or Cancel All pending)
     }
   }
 
@@ -177,7 +166,6 @@ class _BookRoomState extends State<BookRoom> {
     );
   }
 
-  
   void _bookFullDay(String room) {
     _sendRequestToAdmin(room, 'full_day');
     List<String> times = _roomBookings.keys.toList();
@@ -212,7 +200,6 @@ class _BookRoomState extends State<BookRoom> {
     );
   }
 
-  // Cancel only pending slots
   void _cancelAllPendingBookings(String room) {
     setState(() {
       for (final time in _roomBookings.keys) {
@@ -244,31 +231,31 @@ class _BookRoomState extends State<BookRoom> {
 
     switch (status) {
       case UserBookingStatus.available:
-        backgroundColor = Colors.grey[100]!;
-        textColor = Colors.grey[800]!;
+        backgroundColor = const Color(0xFFF8F9FA);
+        textColor = const Color(0xFF6C757D);
         statusText = 'Available';
         isClickable = true;
         showCancelButton = false;
         break;
       case UserBookingStatus.bookedByUser:
-        backgroundColor = const Color(0xFF10B981);
+        backgroundColor = const Color(0xFF11ba82);
         textColor = Colors.white;
         statusText = 'Booked\nby you';
-        showCancelButton = true; // user can cancel individually
+        showCancelButton = true;
         isClickable = false;
         break;
       case UserBookingStatus.booked:
-        backgroundColor = const Color(0xFFE53E3E);
+        backgroundColor = const Color(0xFFef4444);
         textColor = Colors.white;
         statusText = 'Booked';
         showCancelButton = false;
         isClickable = false;
         break;
       case UserBookingStatus.pending:
-        backgroundColor = const Color(0xFFF59E0B);
+        backgroundColor = const Color(0xFFf59f0a);
         textColor = Colors.white;
         statusText = 'Pending';
-        showCancelButton = false; // pending cannot be canceled individually
+        showCancelButton = false; // Remove X button from pending boxes
         isClickable = false;
         break;
     }
@@ -277,12 +264,16 @@ class _BookRoomState extends State<BookRoom> {
       child: GestureDetector(
         onTap: isClickable ? () => _confirmBooking(time, room) : null,
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          width: 80,
+          height: 80,
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[300]!),
+            border: status == UserBookingStatus.available 
+                ? Border.all(color: const Color(0xFFDEE2E6), width: 1)
+                : null,
           ),
           child: Stack(
             clipBehavior: Clip.none,
@@ -300,8 +291,8 @@ class _BookRoomState extends State<BookRoom> {
               ),
               if (showCancelButton)
                 Positioned(
-                  top: -6,
-                  right: -6,
+                  top: -8,
+                  right: -8,
                   child: GestureDetector(
                     onTap: () => _confirmCancel(time, room),
                     child: Container(
@@ -330,6 +321,7 @@ class _BookRoomState extends State<BookRoom> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 60,
@@ -338,13 +330,13 @@ class _BookRoomState extends State<BookRoom> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: Colors.black87,
+                color: Color(0xFF495057),
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           _buildRoomSlot(time, 'Room 1', _roomBookings[time]!['Room 1']!),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           _buildRoomSlot(time, 'Room 2', _roomBookings[time]!['Room 2']!),
         ],
       ),
@@ -423,7 +415,7 @@ class _BookRoomState extends State<BookRoom> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FC),
+      backgroundColor: const Color(0xFFF9FAFB), // Lighter background
       appBar: AppBar(
         backgroundColor: const Color(0xFF4A6CF7),
         elevation: 0,
@@ -488,7 +480,7 @@ class _BookRoomState extends State<BookRoom> {
                           style: TextStyle(color: Color(0xFFA16207), fontSize: 16, fontWeight: FontWeight.w600),
                         ),
                         Text(
-                          'Pending approval for booking',
+                          'Pending approval for extended booking',
                           style: TextStyle(color: Color(0xFFA16207), fontSize: 14),
                         ),
                       ],
@@ -503,16 +495,55 @@ class _BookRoomState extends State<BookRoom> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _getFormattedDate(),
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Color(0xFFE9ECEF),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      _getFormattedDate(),
+                      style: const TextStyle(
+                        fontSize: 24, 
+                        fontWeight: FontWeight.bold, 
+                        color: Color(0xFF1F2937)
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 0),
                   Expanded(
-                    child: ListView(
-                      children: _roomBookings.keys.map((time) {
-                        return _buildTimeSlot(time);
-                      }).toList(),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(12),
+                          bottomRight: Radius.circular(12),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            spreadRadius: 0,
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ListView(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                        children: _roomBookings.keys.map((time) {
+                          return _buildTimeSlot(time);
+                        }).toList(),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
