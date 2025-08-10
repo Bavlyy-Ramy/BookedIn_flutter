@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 
 class PeopleTab extends StatefulWidget {
-//  final VoidCallback onSuccessMessage;
+  //  final VoidCallback onSuccessMessage;
 
-  const PeopleTab({Key? key,}) : super(key: key);
+  const PeopleTab({Key? key}) : super(key: key);
 
   @override
   _PeopleTabState createState() => _PeopleTabState();
@@ -98,14 +98,24 @@ class _PeopleTabState extends State<PeopleTab> {
                   child: Text('Cancel'),
                 ),
                 ElevatedButton(
-                  onPressed: isValidEmail ? () {
-                    _addNewUser(_emailController.text);
-                    Navigator.of(context).pop();
-                  } : null,
+                  onPressed: isValidEmail
+                      ? () {
+                          _addNewUser(_emailController.text);
+                          Navigator.of(context).pop();
+                        }
+                      : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isValidEmail ? Color(0xFF4A6CF7) : Colors.grey,
+                    backgroundColor: isValidEmail
+                        ? Color(0xFF4A6CF7)
+                        : Colors.grey,
                   ),
-                  child: Text('Save'),
+                  child: Text(
+                    'Save',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ],
             );
@@ -136,7 +146,7 @@ class _PeopleTabState extends State<PeopleTab> {
     _sendPasswordSetupEmail(email);
 
     // Show success message
-//    widget.onSuccessMessage();
+    //    widget.onSuccessMessage();
   }
 
   void _sendPasswordSetupEmail(String email) {
@@ -181,7 +191,9 @@ class _PeopleTabState extends State<PeopleTab> {
                   member.status == StaffStatus.active ? 'Active' : 'Pending',
                   style: TextStyle(
                     fontSize: 14,
-                    color: member.status == StaffStatus.active ? Colors.green : Colors.orange,
+                    color: member.status == StaffStatus.active
+                        ? Colors.green
+                        : Colors.orange,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -231,37 +243,35 @@ class _PeopleTabState extends State<PeopleTab> {
               },
             ),
           ),
-          
+
           // Add New User Button
-          Container(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _showAddUserDialog,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF4A6CF7),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Add New User',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          _buildAddNewUserBtn(context),
+          SizedBox(height: 20),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAddNewUserBtn(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width / 2 + 25,
+        child: ElevatedButton.icon(
+          onPressed: _showAddUserDialog,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF4A6CF7),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+          ),
+          icon: const Icon(Icons.add, size: 20),
+          label: const Text(
+            'Add New User',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+        ),
       ),
     );
   }

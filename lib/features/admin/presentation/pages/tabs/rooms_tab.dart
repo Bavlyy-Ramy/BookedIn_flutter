@@ -257,6 +257,7 @@ class _RoomsTabState extends State<RoomsTab> {
           // Room Availability Card
           Expanded(
             child: Container(
+              clipBehavior: Clip.none,
               padding: EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -290,7 +291,7 @@ class _RoomsTabState extends State<RoomsTab> {
                         top: 8,
                         left: 4,
                         right: 2,
-                        bottom: 0,
+                        bottom: 16,
                       ),
                       children: _roomBookings.keys.map((time) {
                         return _buildTimeSlot(time);

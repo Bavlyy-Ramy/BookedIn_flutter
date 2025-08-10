@@ -17,13 +17,25 @@ class _BookRoomState extends State<BookRoom> {
   @override
   void initState() {
     super.initState();
-    _generateTimeSlots(); // create slots from 8 AM to 8 PM
+    _generateTimeSlots();
   }
 
   void _generateTimeSlots() {
     _roomBookings = {};
-    DateTime startTime = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 8, 0);
-    DateTime endTime = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 20, 0);
+    DateTime startTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      8,
+      0,
+    );
+    DateTime endTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      20,
+      0,
+    );
 
     while (startTime.isBefore(endTime) || startTime.isAtSameMomentAs(endTime)) {
       String timeLabel =
@@ -87,12 +99,11 @@ class _BookRoomState extends State<BookRoom> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text("Cancel Booking"),
-        content: Text("Are you sure you want to cancel booking for $room at $time?"),
+        content: Text(
+          "Are you sure you want to cancel booking for $room at $time?",
+        ),
         actions: [
-          TextButton(
-            child: Text("No"),
-            onPressed: () => Navigator.pop(ctx),
-          ),
+          TextButton(child: Text("No"), onPressed: () => Navigator.pop(ctx)),
           ElevatedButton(
             child: Text("Yes"),
             onPressed: () {
@@ -120,7 +131,9 @@ class _BookRoomState extends State<BookRoom> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text("Confirm Booking"),
-        content: Text("Do you want to request booking for the full day in $room?"),
+        content: Text(
+          "Do you want to request booking for the full day in $room?",
+        ),
         actions: [
           TextButton(
             child: Text("Cancel"),
@@ -156,12 +169,11 @@ class _BookRoomState extends State<BookRoom> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text("Cancel All Bookings"),
-        content: Text("Are you sure you want to cancel all bookings for $room?"),
+        content: Text(
+          "Are you sure you want to cancel all bookings for $room?",
+        ),
         actions: [
-          TextButton(
-            child: Text("No"),
-            onPressed: () => Navigator.pop(ctx),
-          ),
+          TextButton(child: Text("No"), onPressed: () => Navigator.pop(ctx)),
           ElevatedButton(
             child: Text("Yes"),
             onPressed: () {
@@ -189,7 +201,7 @@ class _BookRoomState extends State<BookRoom> {
     print('Request sent to admin for $room - $type');
   }
 
-//////////////////////////////////////////// for future logic
+  //////////////////////////////////////////// for future logic
   void _adminConfirmBooking(String time, String room) {
     if (_roomBookings[time]![room] == UserBookingStatus.pending) {
       setState(() {
@@ -268,11 +280,7 @@ class _BookRoomState extends State<BookRoom> {
                         color: Colors.red,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 14,
-                      ),
+                      child: Icon(Icons.close, color: Colors.white, size: 14),
                     ),
                   ),
                 ),
@@ -315,7 +323,7 @@ class _BookRoomState extends State<BookRoom> {
           Text(
             roomName,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
@@ -359,8 +367,18 @@ class _BookRoomState extends State<BookRoom> {
 
   String _getFormattedDate() {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return '${months[_selectedDate.month - 1]} ${_selectedDate.day}, ${_selectedDate.year}';
   }
@@ -391,7 +409,11 @@ class _BookRoomState extends State<BookRoom> {
             ),
             Text(
               'Book Room',
-              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -422,7 +444,11 @@ class _BookRoomState extends State<BookRoom> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.hourglass_empty, color: Color(0xFFA16207), size: 24),
+                  Icon(
+                    Icons.hourglass_empty,
+                    color: Color(0xFFA16207),
+                    size: 24,
+                  ),
                   SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -431,13 +457,17 @@ class _BookRoomState extends State<BookRoom> {
                         Text(
                           'Request sent to admin.',
                           style: TextStyle(
-                              color: Color(0xFFA16207),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600),
+                            color: Color(0xFFA16207),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         Text(
                           'Pending approval for booking',
-                          style: TextStyle(color: Color(0xFFA16207), fontSize: 14),
+                          style: TextStyle(
+                            color: Color(0xFFA16207),
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                     ),
@@ -453,7 +483,11 @@ class _BookRoomState extends State<BookRoom> {
                 children: [
                   Text(
                     _getFormattedDate(),
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                   SizedBox(height: 24),
                   Expanded(

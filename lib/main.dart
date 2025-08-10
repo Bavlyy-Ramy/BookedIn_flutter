@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: BookRoom(),
+      home: LoginPage(),
       navigatorKey: navigatorKey,
       routes: {
         LoginPage.route: (context) => LoginPage(),
