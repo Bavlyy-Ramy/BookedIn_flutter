@@ -1,6 +1,6 @@
 import 'package:bookedin_app/features/auth/presentation/pages/login_page.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Add in pubspec
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'tabs/people_tab.dart';
 import 'tabs/rooms_tab.dart';
 import 'tabs/requests_tab.dart';

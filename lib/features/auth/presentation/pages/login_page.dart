@@ -186,7 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                   errorCount = 0;
                 });
 
-                                  Navigator.pushNamed(context, StaffPortal.route);
+                                  Navigator.pushNamed(context, AdminPortal.route);
 
               }
             },

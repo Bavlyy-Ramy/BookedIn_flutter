@@ -10,30 +10,12 @@ class _RoomsTabState extends State<RoomsTab> {
   DateTime _selectedDate = DateTime(2025, 8, 5);
 
   Map<String, Map<String, RoomStatus>> _roomBookings = {
-    '09:00': {
-      'Room 1': RoomStatus.available,
-      'Room 2': RoomStatus.booked,
-    },
-    '09:30': {
-      'Room 1': RoomStatus.pending,
-      'Room 2': RoomStatus.available,
-    },
-    '10:00': {
-      'Room 1': RoomStatus.booked,
-      'Room 2': RoomStatus.booked,
-    },
-    '10:30': {
-      'Room 1': RoomStatus.available,
-      'Room 2': RoomStatus.pending,
-    },
-    '11:00': {
-      'Room 1': RoomStatus.pending,
-      'Room 2': RoomStatus.available,
-    },
-    '11:30': {
-      'Room 1': RoomStatus.booked,
-      'Room 2': RoomStatus.booked,
-    },
+    '09:00': {'Room 1': RoomStatus.available, 'Room 2': RoomStatus.booked},
+    '09:30': {'Room 1': RoomStatus.pending, 'Room 2': RoomStatus.available},
+    '10:00': {'Room 1': RoomStatus.booked, 'Room 2': RoomStatus.booked},
+    '10:30': {'Room 1': RoomStatus.available, 'Room 2': RoomStatus.pending},
+    '11:00': {'Room 1': RoomStatus.pending, 'Room 2': RoomStatus.available},
+    '11:30': {'Room 1': RoomStatus.booked, 'Room 2': RoomStatus.booked},
   };
 
   void _showCancelBookingDialog(String time, String room) {
@@ -86,8 +68,18 @@ class _RoomsTabState extends State<RoomsTab> {
 
   String _getFormattedDate() {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${_selectedDate.day} ${months[_selectedDate.month - 1]} ${_selectedDate.year}';
   }
@@ -109,42 +101,67 @@ class _RoomsTabState extends State<RoomsTab> {
         statusText = 'Pending';
         break;
       case RoomStatus.booked:
-        backgroundColor = Color(0xFFE53E3E);
+        backgroundColor = Color(0xFF11ba82);
         textColor = Colors.white;
         statusText = 'Booked';
         break;
     }
 
     return Expanded(
-      child: GestureDetector(
-        onTap: status == RoomStatus.booked ? () => _showCancelBookingDialog(time, room) : null,
-        child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 4),
-          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            children: [
-              Text(
-                room,
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      room,
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      statusText,
+                      style: TextStyle(color: textColor, fontSize: 15),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 4),
-              Text(
-                statusText,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 12,
+            ),
+            if (status == RoomStatus.booked)
+              Positioned(
+                top: -6,
+                right: -6,
+                child: GestureDetector(
+                  onTap: () {
+                    _showCancelBookingDialog(time, room);
+                  },
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.close, size: 14, color: Colors.white),
+                  ),
                 ),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -269,6 +286,12 @@ class _RoomsTabState extends State<RoomsTab> {
                   // Time Slots List
                   Expanded(
                     child: ListView(
+                      padding: const EdgeInsets.only(
+                        top: 8,
+                        left: 4,
+                        right: 2,
+                        bottom: 0,
+                      ),
                       children: _roomBookings.keys.map((time) {
                         return _buildTimeSlot(time);
                       }).toList(),
