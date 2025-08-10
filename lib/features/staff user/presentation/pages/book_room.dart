@@ -23,10 +23,20 @@ class _BookRoomState extends State<BookRoom> {
 
   void _generateTimeSlots() {
     _roomBookings = {};
-    DateTime startTime =
-        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 8, 0);
-    DateTime endTime =
-        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, 20, 0);
+    DateTime startTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      8,
+      0,
+    );
+    DateTime endTime = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      20,
+      0,
+    );
 
     while (startTime.isBefore(endTime) || startTime.isAtSameMomentAs(endTime)) {
       String timeLabel =
@@ -59,7 +69,10 @@ class _BookRoomState extends State<BookRoom> {
         title: const Text("Confirm Booking"),
         content: Text("Do you want to book $room at $time?"),
         actions: [
-          TextButton(child: const Text("Cancel"), onPressed: () => Navigator.pop(ctx)),
+          TextButton(
+            child: const Text("Cancel"),
+            onPressed: () => Navigator.pop(ctx),
+          ),
           ElevatedButton(
             child: const Text("Confirm"),
             onPressed: () {
@@ -91,7 +104,8 @@ class _BookRoomState extends State<BookRoom> {
     while (i < times.length) {
       if (_roomBookings[times[i]]![room] == UserBookingStatus.bookedByUser) {
         int j = i;
-        while (j < times.length && _roomBookings[times[j]]![room] == UserBookingStatus.bookedByUser) {
+        while (j < times.length &&
+            _roomBookings[times[j]]![room] == UserBookingStatus.bookedByUser) {
           j++;
         }
         final len = j - i;
@@ -123,9 +137,14 @@ class _BookRoomState extends State<BookRoom> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text("Cancel Booking"),
-        content: Text("Are you sure you want to cancel booking for $room at $time?"),
+        content: Text(
+          "Are you sure you want to cancel booking for $room at $time?",
+        ),
         actions: [
-          TextButton(child: const Text("No"), onPressed: () => Navigator.pop(ctx)),
+          TextButton(
+            child: const Text("No"),
+            onPressed: () => Navigator.pop(ctx),
+          ),
           ElevatedButton(
             child: const Text("Yes"),
             onPressed: () {
@@ -151,9 +170,14 @@ class _BookRoomState extends State<BookRoom> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text("Confirm Booking"),
-        content: Text("Do you want to request booking for the full day in $room?"),
+        content: Text(
+          "Do you want to request booking for the full day in $room?",
+        ),
         actions: [
-          TextButton(child: const Text("Cancel"), onPressed: () => Navigator.pop(ctx)),
+          TextButton(
+            child: const Text("Cancel"),
+            onPressed: () => Navigator.pop(ctx),
+          ),
           ElevatedButton(
             child: const Text("Confirm"),
             onPressed: () {
@@ -185,9 +209,14 @@ class _BookRoomState extends State<BookRoom> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text("Cancel All"),
-        content: Text("Are you sure you want to cancel all pending bookings for $room?"),
+        content: Text(
+          "Are you sure you want to cancel all pending bookings for $room?",
+        ),
         actions: [
-          TextButton(child: const Text("No"), onPressed: () => Navigator.pop(ctx)),
+          TextButton(
+            child: const Text("No"),
+            onPressed: () => Navigator.pop(ctx),
+          ),
           ElevatedButton(
             child: const Text("Yes"),
             onPressed: () {
@@ -255,7 +284,7 @@ class _BookRoomState extends State<BookRoom> {
         backgroundColor = const Color(0xFFf59f0a);
         textColor = Colors.white;
         statusText = 'Pending';
-        showCancelButton = false; // Remove X button from pending boxes
+        showCancelButton = false;
         isClickable = false;
         break;
     }
@@ -271,7 +300,7 @@ class _BookRoomState extends State<BookRoom> {
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(8),
-            border: status == UserBookingStatus.available 
+            border: status == UserBookingStatus.available
                 ? Border.all(color: const Color(0xFFDEE2E6), width: 1)
                 : null,
           ),
@@ -285,7 +314,7 @@ class _BookRoomState extends State<BookRoom> {
                   style: TextStyle(
                     color: textColor,
                     fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                    fontSize: 20,
                   ),
                 ),
               ),
@@ -344,7 +373,9 @@ class _BookRoomState extends State<BookRoom> {
   }
 
   Widget _buildRoomColumn(String roomName) {
-    bool hasPending = _roomBookings.values.any((m) => m[roomName] == UserBookingStatus.pending);
+    bool hasPending = _roomBookings.values.any(
+      (m) => m[roomName] == UserBookingStatus.pending,
+    );
 
     return Expanded(
       child: Column(
@@ -352,7 +383,7 @@ class _BookRoomState extends State<BookRoom> {
           Text(
             roomName,
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
@@ -370,7 +401,10 @@ class _BookRoomState extends State<BookRoom> {
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              child: const Text('Book Full Day'),
+              child: const Text(
+                'Book Full Day',
+                style: TextStyle(fontSize: 18),
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -379,14 +413,16 @@ class _BookRoomState extends State<BookRoom> {
             child: ElevatedButton(
               onPressed: hasPending ? () => _confirmCancelAll(roomName) : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: hasPending ? const Color(0xFF6B7280) : Colors.grey[300],
+                backgroundColor: hasPending
+                    ? const Color(0xFF6B7280)
+                    : Colors.grey[300],
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              child: const Text('Cancel All Pending'),
+              child: const Text('Cancel All', style: TextStyle(fontSize: 18)),
             ),
           ),
         ],
@@ -407,7 +443,7 @@ class _BookRoomState extends State<BookRoom> {
       'September',
       'October',
       'November',
-      'December'
+      'December',
     ];
     return '${months[_selectedDate.month - 1]} ${_selectedDate.day}, ${_selectedDate.year}';
   }
@@ -433,12 +469,19 @@ class _BookRoomState extends State<BookRoom> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
               ),
             ),
             const Text(
               'Book Room',
-              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -450,7 +493,10 @@ class _BookRoomState extends State<BookRoom> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
               ),
               child: const Text('Logout'),
             ),
@@ -469,7 +515,11 @@ class _BookRoomState extends State<BookRoom> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.hourglass_empty, color: Color(0xFFA16207), size: 24),
+                  const Icon(
+                    Icons.hourglass_empty,
+                    color: Color(0xFFA16207),
+                    size: 24,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -477,11 +527,18 @@ class _BookRoomState extends State<BookRoom> {
                       children: const [
                         Text(
                           'Request sent to admin.',
-                          style: TextStyle(color: Color(0xFFA16207), fontSize: 16, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: Color(0xFFA16207),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         Text(
                           'Pending approval for extended booking',
-                          style: TextStyle(color: Color(0xFFA16207), fontSize: 14),
+                          style: TextStyle(
+                            color: Color(0xFFA16207),
+                            fontSize: 17,
+                          ),
                         ),
                       ],
                     ),
@@ -497,7 +554,10 @@ class _BookRoomState extends State<BookRoom> {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.only(
@@ -505,18 +565,15 @@ class _BookRoomState extends State<BookRoom> {
                         topRight: Radius.circular(12),
                       ),
                       border: Border(
-                        bottom: BorderSide(
-                          color: Color(0xFFE9ECEF),
-                          width: 1,
-                        ),
+                        bottom: BorderSide(color: Color(0xFFE9ECEF), width: 1),
                       ),
                     ),
                     child: Text(
                       _getFormattedDate(),
                       style: const TextStyle(
-                        fontSize: 24, 
-                        fontWeight: FontWeight.bold, 
-                        color: Color(0xFF1F2937)
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1F2937),
                       ),
                     ),
                   ),
@@ -539,7 +596,10 @@ class _BookRoomState extends State<BookRoom> {
                         ],
                       ),
                       child: ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 20,
+                        ),
                         children: _roomBookings.keys.map((time) {
                           return _buildTimeSlot(time);
                         }).toList(),
