@@ -14,6 +14,9 @@ class _BookRoomState extends State<BookRoom> {
 
   // timeLabel -> { roomName: status }
   late Map<String, Map<String, UserBookingStatus>> _roomBookings;
+  
+  // Track if user already provided reason for this room today
+  Set<String> _roomsWithReasonProvided = {};
 
   @override
   void initState() {
@@ -118,18 +121,180 @@ class _BookRoomState extends State<BookRoom> {
       }
     }
 
-    if (indicesToConvert.isNotEmpty) {
-      setState(() {
+    // Also check for bookedByUser slots that are contiguous to existing pending slots
+    List<int> contiguousToPendingIndices = [];
+    for (int i = 0; i < times.length; i++) {
+      if (_roomBookings[times[i]]![room] == UserBookingStatus.bookedByUser) {
+        // Check if this bookedByUser slot is contiguous to any pending slot
+        bool isContiguousToPending = false;
+        
+        // Check previous slot
+        if (i > 0 && _roomBookings[times[i-1]]![room] == UserBookingStatus.pending) {
+          isContiguousToPending = true;
+        }
+        
+        // Check next slot
+        if (i < times.length - 1 && _roomBookings[times[i+1]]![room] == UserBookingStatus.pending) {
+          isContiguousToPending = true;
+        }
+        
+        if (isContiguousToPending) {
+          contiguousToPendingIndices.add(i);
+        }
+      }
+    }
+
+    // Combine both lists and remove duplicates
+    Set<int> allIndicesToConvert = {...indicesToConvert, ...contiguousToPendingIndices};
+
+    if (allIndicesToConvert.isNotEmpty) {
+      // Check if we have new 4+ slot sequences that need reason dialog
+      bool hasNewSequenceNeedingReason = false;
+      if (indicesToConvert.length >= 4) {
+        // Check if these 4+ slots are NOT contiguous to existing pending slots
+        bool isNewSequence = true;
         for (final idx in indicesToConvert) {
-          final t = times[idx];
-          if (_roomBookings[t]![room] == UserBookingStatus.bookedByUser) {
-            _roomBookings[t]![room] = UserBookingStatus.pending;
+          // Check if any of these slots is adjacent to existing pending slots
+          if (idx > 0 && _roomBookings[times[idx-1]]![room] == UserBookingStatus.pending) {
+            isNewSequence = false;
+            break;
+          }
+          if (idx < times.length - 1 && _roomBookings[times[idx+1]]![room] == UserBookingStatus.pending) {
+            isNewSequence = false;
+            break;
           }
         }
-      });
-      _sendRequestToAdmin(room, 'multi_hour_pending');
-      _showPendingMessageTemporary();
+        hasNewSequenceNeedingReason = isNewSequence;
+      }
+
+      if (hasNewSequenceNeedingReason) {
+        _showReasonDialog(room, () {
+          setState(() {
+            for (final idx in allIndicesToConvert) {
+              final t = times[idx];
+              if (_roomBookings[t]![room] == UserBookingStatus.bookedByUser) {
+                _roomBookings[t]![room] = UserBookingStatus.pending;
+              }
+            }
+          });
+          _sendRequestToAdmin(room, 'multi_hour_pending');
+          _showPendingMessageTemporary();
+        });
+      } else {
+        // No dialog needed - either extending existing pending or user already provided reason
+        setState(() {
+          for (final idx in allIndicesToConvert) {
+            final t = times[idx];
+            if (_roomBookings[t]![room] == UserBookingStatus.bookedByUser) {
+              _roomBookings[t]![room] = UserBookingStatus.pending;
+            }
+          }
+        });
+        _sendRequestToAdmin(room, 'multi_hour_pending');
+        _showPendingMessageTemporary();
+      }
     }
+  }
+
+  void _showReasonDialog(String room, VoidCallback onConfirm) {
+    String? selectedReason;
+    String otherReason = '';
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text("Booking Reason for $room"),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Please select a reason for your extended booking:",
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                ...['DSM (Daily Stand-up)', 'Planning', 'Build plan', 'Grooming / Backlog Refinement', 'Sprint Review'].map((reason) =>
+                  RadioListTile<String>(
+                    title: Text(reason),
+                    value: reason,
+                    groupValue: selectedReason,
+                    onChanged: (value) {
+                      setDialogState(() {
+                        selectedReason = value;
+                      });
+                    },
+                  ),
+                ),
+                RadioListTile<String>(
+                  title: const Text("Other"),
+                  value: "Other",
+                  groupValue: selectedReason,
+                  onChanged: (value) {
+                    setDialogState(() {
+                      selectedReason = value;
+                    });
+                  },
+                ),
+                if (selectedReason == "Other") ...[
+                  const SizedBox(height: 8),
+                  TextField(
+                    decoration: const InputDecoration(
+                      hintText: "Please specify...",
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      otherReason = value;
+                    },
+                    maxLines: 2,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Navigator.pop(ctx);
+                // Revert the booking
+                _cancelBookingSequence(room);
+              },
+            ),
+            ElevatedButton(
+              child: const Text("Save"),
+              onPressed: () {
+                if (selectedReason != null && 
+                    (selectedReason != "Other" || otherReason.isNotEmpty)) {
+                  Navigator.pop(ctx);
+                  _roomsWithReasonProvided.add(room);
+                  final finalReason = selectedReason == "Other" ? otherReason : selectedReason!;
+                  _sendBookingReasonToAdmin(room, finalReason);
+                  onConfirm();
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _cancelBookingSequence(String room) {
+    setState(() {
+      for (final time in _roomBookings.keys) {
+        if (_roomBookings[time]![room] == UserBookingStatus.bookedByUser) {
+          _roomBookings[time]![room] = UserBookingStatus.available;
+        }
+      }
+    });
+  }
+
+  void _sendBookingReasonToAdmin(String room, String reason) {
+    debugPrint('Booking reason sent to admin for $room: $reason');
   }
 
   void _confirmCancel(String time, String room) {
@@ -191,6 +356,21 @@ class _BookRoomState extends State<BookRoom> {
   }
 
   void _bookFullDay(String room) {
+    bool hasPending = _roomBookings.values.any(
+      (m) => m[room] == UserBookingStatus.pending,
+    );
+
+    // If no pending bookings and user hasn't provided reason yet, show reason dialog
+    if (!hasPending && !_roomsWithReasonProvided.contains(room)) {
+      _showReasonDialog(room, () {
+        _proceedWithFullDayBooking(room);
+      });
+    } else {
+      _proceedWithFullDayBooking(room);
+    }
+  }
+
+  void _proceedWithFullDayBooking(String room) {
     _sendRequestToAdmin(room, 'full_day');
     List<String> times = _roomBookings.keys.toList();
 
@@ -237,6 +417,8 @@ class _BookRoomState extends State<BookRoom> {
         }
       }
     });
+    // Reset reason provided flag when all pending are cancelled
+    _roomsWithReasonProvided.remove(room);
   }
 
   void _sendRequestToAdmin(String room, String type) {
@@ -320,21 +502,29 @@ class _BookRoomState extends State<BookRoom> {
               ),
               if (showCancelButton)
                 Positioned(
-                  top: -8,
-                  right: -8,
+                  top: -12,
+                  right: -12,
                   child: GestureDetector(
                     onTap: () => _confirmCancel(time, room),
                     child: Container(
-                      width: 22,
-                      height: 22,
-                      decoration: const BoxDecoration(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
                         color: Colors.red,
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            spreadRadius: 1,
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: const Icon(
                         Icons.close,
                         color: Colors.white,
-                        size: 14,
+                        size: 20,
                       ),
                     ),
                   ),
