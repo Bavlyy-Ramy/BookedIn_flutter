@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class BookRoom extends StatefulWidget {
   const BookRoom({super.key});
@@ -11,10 +12,11 @@ class BookRoom extends StatefulWidget {
 class _BookRoomState extends State<BookRoom> {
   DateTime _selectedDate = DateTime(2025, 8, 12);
   bool _showPendingMessage = false;
+  late DateTime selectedDay;
 
   // timeLabel -> { roomName: status }
   late Map<String, Map<String, UserBookingStatus>> _roomBookings;
-  
+
   // Track if user already provided reason for this room today
   Set<String> _roomsWithReasonProvided = {};
 
@@ -22,6 +24,13 @@ class _BookRoomState extends State<BookRoom> {
   void initState() {
     super.initState();
     _generateTimeSlots(); // create slots from 8:00 to 20:00 every 30 minutes
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Retrieve passed argument safely
+    selectedDay = ModalRoute.of(context)!.settings.arguments as DateTime;
   }
 
   void _generateTimeSlots() {
@@ -127,17 +136,19 @@ class _BookRoomState extends State<BookRoom> {
       if (_roomBookings[times[i]]![room] == UserBookingStatus.bookedByUser) {
         // Check if this bookedByUser slot is contiguous to any pending slot
         bool isContiguousToPending = false;
-        
+
         // Check previous slot
-        if (i > 0 && _roomBookings[times[i-1]]![room] == UserBookingStatus.pending) {
+        if (i > 0 &&
+            _roomBookings[times[i - 1]]![room] == UserBookingStatus.pending) {
           isContiguousToPending = true;
         }
-        
+
         // Check next slot
-        if (i < times.length - 1 && _roomBookings[times[i+1]]![room] == UserBookingStatus.pending) {
+        if (i < times.length - 1 &&
+            _roomBookings[times[i + 1]]![room] == UserBookingStatus.pending) {
           isContiguousToPending = true;
         }
-        
+
         if (isContiguousToPending) {
           contiguousToPendingIndices.add(i);
         }
@@ -145,7 +156,10 @@ class _BookRoomState extends State<BookRoom> {
     }
 
     // Combine both lists and remove duplicates
-    Set<int> allIndicesToConvert = {...indicesToConvert, ...contiguousToPendingIndices};
+    Set<int> allIndicesToConvert = {
+      ...indicesToConvert,
+      ...contiguousToPendingIndices,
+    };
 
     if (allIndicesToConvert.isNotEmpty) {
       // Check if we have new 4+ slot sequences that need reason dialog
@@ -155,11 +169,15 @@ class _BookRoomState extends State<BookRoom> {
         bool isNewSequence = true;
         for (final idx in indicesToConvert) {
           // Check if any of these slots is adjacent to existing pending slots
-          if (idx > 0 && _roomBookings[times[idx-1]]![room] == UserBookingStatus.pending) {
+          if (idx > 0 &&
+              _roomBookings[times[idx - 1]]![room] ==
+                  UserBookingStatus.pending) {
             isNewSequence = false;
             break;
           }
-          if (idx < times.length - 1 && _roomBookings[times[idx+1]]![room] == UserBookingStatus.pending) {
+          if (idx < times.length - 1 &&
+              _roomBookings[times[idx + 1]]![room] ==
+                  UserBookingStatus.pending) {
             isNewSequence = false;
             break;
           }
@@ -199,7 +217,7 @@ class _BookRoomState extends State<BookRoom> {
   void _showReasonDialog(String room, VoidCallback onConfirm) {
     String? selectedReason;
     String otherReason = '';
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -217,8 +235,14 @@ class _BookRoomState extends State<BookRoom> {
                   style: TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 16),
-                ...['DSM (Daily Stand-up)', 'Planning', 'Build plan', 'Grooming / Backlog Refinement', 'Sprint Review'].map((reason) =>
-                  RadioListTile<String>(
+                ...[
+                  'DSM (Daily Stand-up)',
+                  'Planning',
+                  'Build plan',
+                  'Grooming / Backlog Refinement',
+                  'Sprint Review',
+                ].map(
+                  (reason) => RadioListTile<String>(
                     title: Text(reason),
                     value: reason,
                     groupValue: selectedReason,
@@ -267,11 +291,13 @@ class _BookRoomState extends State<BookRoom> {
             ElevatedButton(
               child: const Text("Save"),
               onPressed: () {
-                if (selectedReason != null && 
+                if (selectedReason != null &&
                     (selectedReason != "Other" || otherReason.isNotEmpty)) {
                   Navigator.pop(ctx);
                   _roomsWithReasonProvided.add(room);
-                  final finalReason = selectedReason == "Other" ? otherReason : selectedReason!;
+                  final finalReason = selectedReason == "Other"
+                      ? otherReason
+                      : selectedReason!;
                   _sendBookingReasonToAdmin(room, finalReason);
                   onConfirm();
                 }
@@ -620,23 +646,6 @@ class _BookRoomState extends State<BookRoom> {
     );
   }
 
-  String _getFormattedDate() {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return '${months[_selectedDate.month - 1]} ${_selectedDate.day}, ${_selectedDate.year}';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -759,7 +768,7 @@ class _BookRoomState extends State<BookRoom> {
                       ),
                     ),
                     child: Text(
-                      _getFormattedDate(),
+                      '${DateFormat('EEEE, d MMM yyyy').format(selectedDay)}',
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,

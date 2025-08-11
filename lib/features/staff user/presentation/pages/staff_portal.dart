@@ -15,40 +15,10 @@ class StaffPortal extends StatefulWidget {
 
 class _StaffPortalState extends State<StaffPortal> {
   DateTime today = DateTime.now();
+  DateTime lastDay = DateTime.now().add(const Duration(days: 30));
 
   void _onDaySelected(DateTime day, DateTime focusedDay) {
-    // showDialog(
-    //   context: context,
-    //   builder: (BuildContext context) {
-    //     return AlertDialog(
-    //       title: Text('Booking'),
-    //       content: Text(
-    //         'Are you sure you want to book on ${DateFormat('d/M/yyyy').format(focusedDay)}?',
-    //       ),
-    //       actions: [
-    //         TextButton(
-    //           onPressed: () {
-    //             Navigator.of(context).pop();
-    //           },
-    //           child: Text('No'),
-    //         ),
-    //         TextButton(
-    //           onPressed: () {
-    //             setState(() {
-
-    //             });
-    //           },
-    //           child: Text('Yes'),
-    //         ),
-    //       ],
-    //     );
-    //   },
-    // );
-    Navigator.pushNamed(context, BookRoom.route);
-
-    setState(() {
-      today = day;
-    });
+    Navigator.pushNamed(context, BookRoom.route,  arguments: day,);
   }
 
   @override
@@ -126,7 +96,7 @@ class _StaffPortalState extends State<StaffPortal> {
         return TableCalendar(
           focusedDay: today,
           firstDay: today,
-          lastDay: DateTime.utc(2030, 10, 16),
+          lastDay: lastDay,
           onDaySelected: _onDaySelected,
           selectedDayPredicate: (day) => isSameDay(day, today),
           availableGestures: AvailableGestures.all,
