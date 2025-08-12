@@ -1,15 +1,19 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:bookedin_app/core/DI/injection_container.dart';
 import 'package:bookedin_app/features/admin/presentation/pages/admin_portal.dart';
+import 'package:bookedin_app/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:bookedin_app/features/auth/presentation/cubit/auth_state.dart';
 import 'package:bookedin_app/features/auth/presentation/widgets/CustomTextFormField.dart';
-import 'package:bookedin_app/features/staff%20user/presentation/pages/staff_portal.dart';
+import 'package:bookedin_app/features/staff_user/presentation/pages/staff_portal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({super.key});
-
   static const route = '/login_page';
+
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -67,56 +71,83 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF2560e8),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildLogo(),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              isBlocked ? "Account Blocked" : "Welcome Back",
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 40,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          Text(
-            isBlocked
-                ? "Too many failed attempts"
-                : "Sign in to book meeting rooms",
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 30),
+    return BlocProvider(
+      create: (_) => sl<AuthCubit>(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFF2560e8),
+        body: BlocConsumer<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state is AuthAuthenticated) {
+              if (state.user.role.toLowerCase() == "admin" ) {
+                Navigator.pushReplacementNamed(context, AdminPortal.route);
+              } else {
+                Navigator.pushReplacementNamed(context, StaffPortal.route);
+              }
+            } else if (state is AuthError) {
+              setState(() {
+                showErrorMsg = true;
+                errorCount++;
+                if (errorCount >= 5) {
+                  isBlocked = true;
+                  blockUntil = DateTime.now().add(const Duration(minutes: 20));
+                  _checkBlockStatus();
+                }
+              });
+              log('Login failed $errorCount times');
+            }
+          },
+          builder: (context, state) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildLogo(),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    isBlocked ? "Account Blocked" : "Welcome Back",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 40,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Text(
+                  isBlocked
+                      ? "Too many failed attempts"
+                      : "Sign in to book meeting rooms",
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 30),
 
-          if (showErrorMsg && !isBlocked)
-            _buildErrorMsg("❌ Wrong username or password"),
+                if (showErrorMsg && !isBlocked)
+                  _buildErrorMsg("❌ Wrong username or password"),
 
-          if (isBlocked) _buildBlockTimeMsg(),
+                if (isBlocked) _buildBlockTimeMsg(),
 
-          const SizedBox(height: 20),
-          CustomTextFormField(
-            controller: emailController,
-            fieldType: "Email",
-            enabled: !isBlocked,
-          ),
-          CustomTextFormField(
-            controller: passwordController,
-            fieldType: "Password",
-            enabled: !isBlocked,
-          ),
+                const SizedBox(height: 20),
+                CustomTextFormField(
+                  controller: emailController,
+                  fieldType: "Email",
+                  enabled: !isBlocked && state is! AuthLoading,
+                ),
+                CustomTextFormField(
+                  controller: passwordController,
+                  fieldType: "Password",
+                  enabled: !isBlocked && state is! AuthLoading,
+                ),
 
-          const SizedBox(height: 25),
-          _buildElevatedButton(),
-        ],
+                const SizedBox(height: 25),
+                _buildElevatedButton(context, state),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -160,38 +191,21 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  ElevatedButton _buildElevatedButton() {
+  ElevatedButton _buildElevatedButton(BuildContext context, AuthState state) {
     return ElevatedButton(
-      onPressed: isBlocked
+      onPressed: (isBlocked || state is AuthLoading)
           ? null
           : () {
               if (emailController.text.trim().isEmpty ||
                   passwordController.text.trim().isEmpty) {
                 setState(() {
                   showErrorMsg = true;
-                  errorCount++;
-
-                  if (errorCount >= 5) {
-                    isBlocked = true;
-                    blockUntil = DateTime.now().add(
-                      const Duration(minutes: 20),
-                    );
-                    _checkBlockStatus();
-                  }
-
-                  log('Login failed $errorCount times');
                 });
               } else {
-                setState(() {
-                  showErrorMsg = false;
-                  errorCount = 0;
-                });
-                if (emailController.text.trim() == "admin" &&
-                    passwordController.text.trim() == "admin") {
-                  Navigator.pushNamed(context, AdminPortal.route);
-                } else {
-                  Navigator.pushNamed(context, StaffPortal.route);
-                }
+                context.read<AuthCubit>().login(
+                      emailController.text.trim(),
+                      passwordController.text.trim(),
+                    );
               }
             },
       style: ElevatedButton.styleFrom(
@@ -200,14 +214,16 @@ class _LoginPageState extends State<LoginPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),
-      child: const Text(
-        "Sign in",
-        style: TextStyle(
-          color: Color(0xFF2563eb),
-          fontSize: 25,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+      child: state is AuthLoading
+          ? const CircularProgressIndicator(color: Color(0xFF2563eb))
+          : const Text(
+              "Sign in",
+              style: TextStyle(
+                color: Color(0xFF2563eb),
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
     );
   }
 

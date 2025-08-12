@@ -1,5 +1,5 @@
 import 'package:bookedin_app/features/auth/presentation/pages/login_page.dart';
-import 'package:bookedin_app/features/staff%20user/presentation/pages/book_room.dart';
+import 'package:bookedin_app/features/staff_user/presentation/pages/book_room.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
