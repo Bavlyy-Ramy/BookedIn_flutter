@@ -1,5 +1,6 @@
 import 'package:bookedin_app/features/auth/presentation/pages/login_page.dart';
 import 'package:bookedin_app/features/staff_user/presentation/pages/book_room.dart';
+     
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -18,7 +19,10 @@ class _StaffPortalState extends State<StaffPortal> {
   DateTime lastDay = DateTime.now().add(const Duration(days: 30));
 
   void _onDaySelected(DateTime day, DateTime focusedDay) {
-    Navigator.pushNamed(context, BookRoom.route,  arguments: day,);
+    // Only allow navigation for enabled days (not weekends)
+    if (day.weekday != DateTime.friday && day.weekday != DateTime.saturday) {
+      Navigator.pushNamed(context, BookRoom.route, arguments: day);
+    }
   }
 
   @override
@@ -31,7 +35,6 @@ class _StaffPortalState extends State<StaffPortal> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 20),
-
             _buildTableCalendar(),
             SizedBox(height: 15),
             _buildInfoBox(),
@@ -57,7 +60,6 @@ class _StaffPortalState extends State<StaffPortal> {
           child: Text("Selected"),
         ),
         SizedBox(width: 16),
-
         Container(
           width: 20,
           height: 20,
@@ -68,10 +70,9 @@ class _StaffPortalState extends State<StaffPortal> {
         ),
         Padding(
           padding: const EdgeInsets.only(left: 2.0),
-          child: Text("Fully Booked/Pending"),
+          child: Text("Unavailable"),
         ),
         SizedBox(width: 16),
-
         Container(
           width: 20,
           height: 20,
@@ -99,6 +100,12 @@ class _StaffPortalState extends State<StaffPortal> {
           lastDay: lastDay,
           onDaySelected: _onDaySelected,
           selectedDayPredicate: (day) => isSameDay(day, today),
+          
+          // This makes weekends non-selectable
+          enabledDayPredicate: (day) {
+            return day.weekday != DateTime.friday && day.weekday != DateTime.saturday;
+          },
+          
           availableGestures: AvailableGestures.all,
           calendarFormat: CalendarFormat.month,
           rowHeight: cellWidth,
@@ -165,6 +172,13 @@ class _StaffPortalState extends State<StaffPortal> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(6),
             ),
+            
+            // Style for disabled days (weekends)
+            disabledDecoration: BoxDecoration(
+              color: const Color(0xFFedf0f2), // Gray background for disabled days
+              borderRadius: BorderRadius.circular(6),
+            ),
+            
             selectedDecoration: BoxDecoration(
               color: const Color(0xFF2258e0),
               borderRadius: BorderRadius.circular(6),
@@ -176,6 +190,12 @@ class _StaffPortalState extends State<StaffPortal> {
             selectedTextStyle: const TextStyle(color: Colors.white),
             outsideTextStyle: const TextStyle(color: Colors.grey),
             todayTextStyle: const TextStyle(color: Colors.black),
+            
+            // Style for disabled text (weekends)
+            disabledTextStyle: const TextStyle(
+              color: Colors.grey,
+              fontSize: 16,
+            ),
           ),
         );
       },
