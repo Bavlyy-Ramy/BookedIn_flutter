@@ -2,7 +2,7 @@
 
 ## Overview
 
-BookedIn is a mobile-based meeting room management system developed to streamline the process of booking and managing meeting rooms داخل المؤسسات. The application allows employees to easily schedule meetings while giving administrators full control over approvals and resource allocation.
+BookedIn is a mobile-based meeting room management system developed to streamline the process of booking and managing meeting rooms. The application allows employees to easily schedule meetings while giving administrators full control over approvals and resource allocation.
 
 ## Features
 
