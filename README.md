@@ -41,12 +41,11 @@ This ensures maintainability, testability, and scalability.
 6. User receives updated booking status
 
 ## Screenshots
-<img width="1080" height="2400" alt="Screenshot_2026-04-23-14-55-19-982_com example bookedin_app" src="https://github.com/user-attachments/assets/281b7b40-655f-4cb1-b249-4e9a0998600c" />
-<img width="1080" height="2400" alt="Screenshot_2026-04-23-14-55-38-573_com example bookedin_app" src="https://github.com/user-attachments/assets/dde84423-5082-4db1-8c7f-0b56cee2b611" />
-<img width="1080" height="2400" alt="Screenshot_2026-04-23-14-55-24-653_com example bookedin_app" src="https://github.com/user-attachments/assets/a7ccbf30-e4ed-4b03-9012-91f31722eb5a" />
-<img width="1080" height="2400" alt="Screenshot_2026-04-23-14-55-19-982_com example bookedin_app" src="https://github.com/user-attachments/assets/9a261352-b17e-49a4-81fd-f2be1da37f3b" />
-<img width="1080" height="2400" alt="Screenshot_2026-04-23-14-55-57-335_com example bookedin_app" src="https://github.com/user-attachments/assets/5ea79306-cc33-4ae5-b37d-b7efc98640a4" />
-
+<img src="https://github.com/user-attachments/assets/281b7b40-655f-4cb1-b249-4e9a0998600c" width="250"/>
+<img src="https://github.com/user-attachments/assets/dde84423-5082-4db1-8c7f-0b56cee2b611" width="250"/>
+<img src="https://github.com/user-attachments/assets/a7ccbf30-e4ed-4b03-9012-91f31722eb5a" width="250"/>
+<img src="https://github.com/user-attachments/assets/9a261352-b17e-49a4-81fd-f2be1da37f3b" width="250"/>
+<img src="https://github.com/user-attachments/assets/5ea79306-cc33-4ae5-b37d-b7efc98640a4" width="250"/>
 
 ## Future Improvements
 
