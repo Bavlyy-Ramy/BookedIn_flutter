@@ -47,7 +47,6 @@ This ensures maintainability, testability, and scalability.
 <img width="1080" height="2400" alt="Screenshot_2026-04-23-14-55-19-982_com example bookedin_app" src="https://github.com/user-attachments/assets/9a261352-b17e-49a4-81fd-f2be1da37f3b" />
 <img width="1080" height="2400" alt="Screenshot_2026-04-23-14-55-57-335_com example bookedin_app" src="https://github.com/user-attachments/assets/5ea79306-cc33-4ae5-b37d-b7efc98640a4" />
 
-*Add your app screenshots here (Home, Booking, Admin Panel, etc.)*
 
 ## Future Improvements
 
